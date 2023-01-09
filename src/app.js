@@ -7,10 +7,10 @@ app.use(cors());
 
 class Server {
     constructor (user, username, avatar, tweet) {
-    this.user = user;
-    this.username = username;
-    this.avatar = avatar;
-    this.tweet = tweet;
+        this.user = user;
+        this.username = username;
+        this.avatar = avatar;
+        this.tweet = tweet;
     }
   }
 
@@ -18,15 +18,17 @@ const users = [];
 const tweets = [];
 
 
-function tweetSlicer(tweets, pageNumber = 1) {
+function tweetSearcher(tweets, pageNumber = 1) {
 	const sliceMin = (pageNumber - 1) * 10;
 	const sliceMax = pageNumber * 10;
 	const newTweetsArr = [...tweets].reverse();
-	const tweetsliced = newTweetsArr.slice(sliceMin, sliceMax).map((tweet) => {
+	const tweetsearch = newTweetsArr
+		.slice(sliceMin, sliceMax)
+		.map((tweet) => {
 			const user = users.find((user) => user.username === tweet.username);
 			return { ...tweet, avatar: user.avatar };
 		});
-	return tweetsliced;
+	return tweetsearch;
 }
 
 app.post("/sign-up", (req, res) => {
@@ -57,9 +59,20 @@ app.post("/tweets", (req, res) => {
     res.status(201).send('OK');
   });
 
-  app.get("/tweets", (req, res) => {
-    const lastTweets = (tweets.length >= 10) ? tweets.slice(tweets.length - 10) : tweets
-    res.send(lastTweets.reverse())
+app.get("/tweets", (req, res) => {
+    const page = req.query.page;
+	if (page < 1) {
+		res.status(400).send("Informe uma página válida!");
+	}
+    const tweetsearch = tweetSearcher(tweets, page);
+	res.send(tweetsearch);
+})
+
+app.get("/tweets/:username", (req, res) => {
+    const { username } = req.params.username;
+	const userTweets = tweets.filter((tweet) => tweet.username === username);
+	const tweetsearch = tweetSearcher(userTweets);
+	res.send(tweetsearch);
 })
 
 app.listen(5000);
