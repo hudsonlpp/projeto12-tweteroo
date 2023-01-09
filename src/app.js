@@ -5,6 +5,20 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+class User {
+    constructor (username, avatar) {
+      this.username = username;
+      this.avatar = avatar;
+    }
+  }
+  
+  class Tweet {
+    constructor (user, tweet) {
+      this.user = user;
+      this.tweet = tweet;
+    }
+  }
+
 const users = [];
 const tweets = [];
 
@@ -23,15 +37,14 @@ function tweetSearcher(tweets, pageNumber = 1) {
 }
 
 app.post("/sign-up", (req, res) => {
-    const newUser = { username, avatar };
     const { username, avatar } = req.body;
     if (typeof username !== "string" || typeof avatar !== 'string') {
         return res.status(400).send("Todos os campos são obrigatórios");
     } else if (typeof username !== "string" || typeof avatar !== "string") {
         return res.status(400).send("Todos os campos devem ser strings!");
     }
-    users.push(newUser);
-    res.status(201).send("OK");
+    users.push(new User(username, avatar));
+    res.status(201).send('OK');
 })
 
 app.post("/tweets", (req, res) => {
@@ -47,8 +60,7 @@ app.post("/tweets", (req, res) => {
       return res.sendStatus(401);
     }
     
-    const newTweet = { username, tweet };
-    tweets.push(newTweet);
+    tweets.push(new Tweet(user, tweet));
     res.status(201).send('OK');
   });
 
