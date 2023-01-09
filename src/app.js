@@ -4,7 +4,6 @@ import cors from "cors";
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.listen(5000);
 
 class Server {
     constructor (user, username, avatar, tweet) {
@@ -17,6 +16,18 @@ class Server {
 
 const users = [];
 const tweets = [];
+
+
+function tweetSlicer(tweets, pageNumber = 1) {
+	const sliceMin = (pageNumber - 1) * 10;
+	const sliceMax = pageNumber * 10;
+	const newTweetsArr = [...tweets].reverse();
+	const tweetsliced = newTweetsArr.slice(sliceMin, sliceMax).map((tweet) => {
+			const user = users.find((user) => user.username === tweet.username);
+			return { ...tweet, avatar: user.avatar };
+		});
+	return tweetsliced;
+}
 
 app.post("/sign-up", (req, res) => {
     const { username, avatar } = req.body;
@@ -46,16 +57,9 @@ app.post("/tweets", (req, res) => {
     res.status(201).send('OK');
   });
 
-app.get("/tweets", (req, res) => {
-
-    tweets.forEach((tweet) => {
-        const { avatar }  = users.find((user) => user.username === tweet.username)
-        tweet.avatar = avatar
-    })
-
-    if(tweets.length <= 10) {
-        return res.send([...tweets].reverse())
-    } else {
-        return res.send([...tweets].reverse().slice(0, 10))
-    }
+  app.get("/tweets", (req, res) => {
+    const lastTweets = (tweets.length >= 10) ? tweets.slice(tweets.length - 10) : tweets
+    res.send(lastTweets.reverse())
 })
+
+app.listen(5000);
